@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S-M Motos | Vidriera</title>
+<meta name="description" content="Repuestos de moto S-M Motos. Fotos, precios y videos de nuestros productos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --grafito:#1F2226;
+    --panel:#2A2E33;
+    --panel-2:#33383E;
+    --acero:#7A828C;
+    --amarillo:#F5B700;
+    --rojo:#C1272D;
+    --hueso:#EDEAE3;
+    --linea:#3D434A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--grafito);
+    background-image:
+      radial-gradient(circle at 2px 2px, rgba(255,255,255,0.035) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    color:var(--hueso);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  header{
+    padding:28px 20px 18px;
+    text-align:center;
+    border-bottom:3px solid var(--amarillo);
+    background:linear-gradient(180deg, rgba(0,0,0,0.15), transparent);
+  }
+  .eyebrow{
+    font-family:'Oswald',sans-serif;
+    font-size:12px;
+    letter-spacing:4px;
+    color:var(--amarillo);
+    font-weight:600;
+  }
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-size:34px;
+    letter-spacing:1px;
+    margin:6px 0 4px;
+    text-transform:uppercase;
+  }
+  header p{
+    color:var(--acero);
+    font-size:13.5px;
+    margin:0;
+  }
+  .filtros{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:16px 16px 4px;
+    scrollbar-width:none;
+  }
+  .filtros::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;
+    padding:8px 16px;
+    border-radius:20px;
+    border:1px solid var(--linea);
+    background:var(--panel);
+    color:var(--hueso);
+    font-family:'Oswald',sans-serif;
+    font-size:12.5px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .chip.activo{
+    background:var(--amarillo);
+    color:#1F2226;
+    border-color:var(--amarillo);
+  }
+  #grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(160px,1fr));
+    gap:16px;
+    padding:16px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--linea);
+    border-radius:10px;
+    overflow:hidden;
+    cursor:pointer;
+    position:relative;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{ transform:translateY(-3px); border-color:var(--amarillo); }
+  .card.destacado{ border-color:var(--amarillo); }
+  .cinta{
+    position:absolute; top:10px; left:-6px;
+    background:var(--rojo); color:#fff;
+    font-family:'Oswald',sans-serif;
+    font-size:10px; letter-spacing:1px;
+    padding:3px 10px 3px 12px;
+    box-shadow:0 2px 4px rgba(0,0,0,.3);
+    z-index:2;
+  }
+  .foto-wrap{
+    aspect-ratio:1/1;
+    background:var(--panel-2);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  .foto-wrap img{ width:100%; height:100%; object-fit:cover; }
+  .foto-wrap .sinfoto{ color:var(--acero); font-size:11px; }
+  .info{ padding:10px 12px 34px; position:relative; }
+  .info .cat{
+    font-size:10px; letter-spacing:1px; text-transform:uppercase;
+    color:var(--acero); margin-bottom:2px;
+  }
+  .info .nombre{
+    font-family:'Oswald',sans-serif;
+    font-size:14.5px;
+    line-height:1.25;
+    text-transform:uppercase;
+  }
+  .tag{
+    position:absolute;
+    right:-8px; bottom:-10px;
+    background:var(--amarillo);
+    color:#1F2226;
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:6px 14px 6px 10px;
+    transform:rotate(-2deg);
+    box-shadow:0 3px 6px rgba(0,0,0,.35);
+    border-radius:3px;
+  }
+  .tag::before{
+    content:'';
+    position:absolute;
+    left:4px; top:50%;
+    width:5px; height:5px;
+    background:var(--grafito);
+    border-radius:50%;
+    transform:translateY(-50%);
+  }
+  .vacio{
+    text-align:center; padding:60px 20px; color:var(--acero);
+    font-family:'Oswald',sans-serif; letter-spacing:1px; text-transform:uppercase;
+  }
+  /* Modal */
+  #overlay{
+    position:fixed; inset:0; background:rgba(10,10,10,.85);
+    display:none; align-items:center; justify-content:center;
+    padding:16px; z-index:50;
+  }
+  #overlay.show{ display:flex; }
+  #modal{
+    background:var(--panel);
+    max-width:480px; width:100%;
+    max-height:90vh; overflow-y:auto;
+    border-radius:14px;
+    border:1px solid var(--linea);
+    position:relative;
+  }
+  #modal .cerrar{
+    position:absolute; top:10px; right:10px;
+    background:var(--panel-2); color:var(--hueso);
+    border:none; width:32px;height:32px;border-radius:50%;
+    font-size:18px; cursor:pointer; z-index:3;
+  }
+  #modal .media{
+    width:100%; aspect-ratio:1/1; background:var(--panel-2);
+    display:flex;align-items:center;justify-content:center; overflow:hidden;
+  }
+  #modal .media img, #modal .media video{ width:100%; height:100%; object-fit:cover; }
+  #modal .body{ padding:18px 20px 22px; }
+  #modal .cat{ color:var(--amarillo); font-size:11px; letter-spacing:2px; text-transform:uppercase; font-family:'Oswald',sans-serif;}
+  #modal h2{ font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:22px; margin:6px 0 10px; }
+  #modal .desc{ color:#C9CBCE; font-size:14px; line-height:1.5; margin-bottom:16px; }
+  #modal .preciobox{
+    display:inline-block;
+    background:var(--amarillo); color:#1F2226;
+    font-family:'Oswald',sans-serif; font-weight:700;
+    font-size:22px; padding:8px 18px; border-radius:6px;
+    margin-bottom:16px;
+  }
+  #modal .btn-wsp{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:13px; border:none; border-radius:8px;
+    background:#25D366; color:#08341D; font-weight:600;
+    font-family:'Inter',sans-serif; font-size:15px; cursor:pointer;
+  }
+  footer{ text-align:center; padding:26px 16px 40px; color:var(--acero); font-size:12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">S-M MOTOS · MAR DEL PLATA</div>
+  <h1>Vidriera de repuestos</h1>
+  <p>Fotos, precios y videos de nuestros productos</p>
+</header>
+
+<div class="filtros" id="filtros"></div>
+<div id="grid"></div>
+<footer>Precios sujetos a modificación sin previo aviso · Consultá disponibilidad por WhatsApp</footer>
+
+<div id="overlay">
+  <div id="modal">
+    <button class="cerrar" onclick="cerrarModal()">✕</button>
+    <div class="media" id="modalMedia"></div>
+    <div class="body">
+      <div class="cat" id="modalCat"></div>
+      <h2 id="modalNombre"></h2>
+      <div class="desc" id="modalDesc"></div>
+      <div class="preciobox" id="modalPrecio"></div>
+      <button class="btn-wsp" id="btnWsp">📲 Pedir por WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ctdfatckaadjmfvaqvty.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_r6X8MxeJaIeqikBUO8Gdhg_VFG8AfmO';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const WSP_NUMERO = '5492235946978';
+
+let productos = [];
+let categoriaActiva = 'Todos';
+
+const fmt = new Intl.NumberFormat('es-AR', {style:'currency', currency:'ARS', maximumFractionDigits:0});
+
+async function cargar(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="vacio">Cargando productos...</div>';
+  const { data, error } = await sb.from('Vidriera').select('*')
+    .order('destacado', {ascending:false})
+    .order('orden', {ascending:true})
+    .order('created_at', {ascending:false});
+  if(error){
+    grid.innerHTML = '<div class="vacio">No se pudieron cargar los productos.</div>';
+    console.error(error);
+    return;
+  }
+  productos = data || [];
+  armarFiltros();
+  render();
+}
+
+function armarFiltros(){
+  const cats = ['Todos', ...new Set(productos.map(p=>p.categoria).filter(Boolean))];
+  const cont = document.getElementById('filtros');
+  cont.innerHTML = '';
+  cats.forEach(cat=>{
+    const b = document.createElement('button');
+    b.className = 'chip' + (cat===categoriaActiva ? ' activo':'');
+    b.textContent = cat;
+    b.onclick = ()=>{ categoriaActiva = cat; armarFiltros(); render(); };
+    cont.appendChild(b);
+  });
+}
+
+function render(){
+  const grid = document.getElementById('grid');
+  const lista = categoriaActiva==='Todos' ? productos : productos.filter(p=>p.categoria===categoriaActiva);
+  if(lista.length===0){
+    grid.innerHTML = '<div class="vacio">Todavía no hay productos cargados</div>';
+    return;
+  }
+  grid.innerHTML = '';
+  lista.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'card' + (p.destacado ? ' destacado':'');
+    card.onclick = ()=>abrirModal(p);
+    card.innerHTML = `
+      ${p.destacado ? '<div class="cinta">DESTACADO</div>' : ''}
+      <div class="foto-wrap">
+        ${p.foto_url ? `<img src="${p.foto_url}" alt="${p.nombre}">` : '<span class="sinfoto">Sin foto</span>'}
+      </div>
+      <div class="info">
+        <div class="cat">${p.categoria || ''}</div>
+        <div class="nombre">${p.nombre}</div>
+        <div class="tag">${fmt.format(p.precio)}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function abrirModal(p){
+  document.getElementById('modalCat').textContent = p.categoria || '';
+  document.getElementById('modalNombre').textContent = p.nombre;
+  document.getElementById('modalDesc').textContent = p.descripcion || '';
+  document.getElementById('modalPrecio').textContent = fmt.format(p.precio);
+  const media = document.getElementById('modalMedia');
+  if(p.video_url){
+    media.innerHTML = `<video src="${p.video_url}" controls playsinline ${p.foto_url ? `poster="${p.foto_url}"`:''}></video>`;
+  } else if(p.foto_url){
+    media.innerHTML = `<img src="${p.foto_url}" alt="${p.nombre}">`;
+  } else {
+    media.innerHTML = '';
+  }
+  const msg = encodeURIComponent(`Hola! Te consulto por: ${p.nombre} (${fmt.format(p.precio)})`);
+  document.getElementById('btnWsp').onclick = ()=>{
+    window.open(`https://wa.me/${WSP_NUMERO}?text=${msg}`, '_blank');
+  };
+  document.getElementById('overlay').classList.add('show');
+}
+function cerrarModal(){
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('modalMedia').innerHTML = '';
+}
+document.getElementById('overlay').addEventListener('click', e=>{
+  if(e.target.id==='overlay') cerrarModal();
+});
+
+cargar();
+</script>
+</body>
+</html>

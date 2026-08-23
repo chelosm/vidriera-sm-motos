@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S-M Motos | Cargar Vidriera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --grafito:#1F2226; --panel:#2A2E33; --panel-2:#33383E;
+    --acero:#7A828C; --amarillo:#F5B700; --rojo:#C1272D;
+    --hueso:#EDEAE3; --linea:#3D434A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--grafito); color:var(--hueso);
+    font-family:'Inter',sans-serif; padding-bottom:60px;
+  }
+  h1{
+    font-family:'Oswald',sans-serif; text-transform:uppercase;
+    letter-spacing:1px; text-align:center; padding:24px 16px 4px; margin:0;
+  }
+  .sub{ text-align:center; color:var(--acero); font-size:13px; margin-bottom:18px; }
+  .wrap{ max-width:520px; margin:0 auto; padding:0 16px; }
+
+  /* Login */
+  #login{
+    max-width:320px; margin:80px auto; text-align:center;
+    background:var(--panel); border:1px solid var(--linea);
+    border-radius:12px; padding:28px 22px;
+  }
+  #login input{
+    width:100%; padding:12px; border-radius:8px; border:1px solid var(--linea);
+    background:var(--panel-2); color:var(--hueso); font-size:15px; margin:14px 0;
+  }
+  #login button, .btn{
+    width:100%; padding:13px; border:none; border-radius:8px;
+    background:var(--amarillo); color:#1F2226; font-family:'Oswald',sans-serif;
+    font-size:14px; letter-spacing:1px; text-transform:uppercase; font-weight:600;
+    cursor:pointer;
+  }
+  #loginError{ color:var(--rojo); font-size:13px; min-height:18px; }
+
+  /* Form */
+  #app{ display:none; }
+  label{ display:block; font-size:12px; color:var(--acero); text-transform:uppercase; letter-spacing:1px; margin:14px 0 5px; }
+  input[type=text], input[type=number], textarea, select{
+    width:100%; padding:11px; border-radius:8px; border:1px solid var(--linea);
+    background:var(--panel-2); color:var(--hueso); font-size:14.5px; font-family:'Inter',sans-serif;
+  }
+  textarea{ min-height:70px; resize:vertical; }
+  input[type=file]{ width:100%; color:var(--acero); font-size:13px; }
+  .checkrow{ display:flex; align-items:center; gap:8px; margin-top:16px; }
+  .checkrow input{ width:18px; height:18px; }
+  form{ background:var(--panel); border:1px solid var(--linea); border-radius:12px; padding:18px 18px 22px; margin-top:16px; }
+  #estado{ text-align:center; font-size:13px; min-height:20px; margin-top:10px; color:var(--amarillo); }
+  #cancelarEdicion{
+    background:var(--panel-2); color:var(--hueso); margin-top:10px; display:none;
+  }
+
+  .lista{ margin-top:26px; }
+  .item{
+    display:flex; gap:12px; align-items:center;
+    background:var(--panel); border:1px solid var(--linea); border-radius:10px;
+    padding:10px; margin-bottom:10px;
+  }
+  .item img{ width:56px; height:56px; object-fit:cover; border-radius:6px; background:var(--panel-2); }
+  .item .datos{ flex:1; min-width:0; }
+  .item .nombre{ font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; }
+  .item .precio{ color:var(--amarillo); font-size:13px; font-weight:600; }
+  .item .cat{ color:var(--acero); font-size:11px; }
+  .item .acciones{ display:flex; flex-direction:column; gap:6px; }
+  .item .acciones button{
+    border:none; border-radius:6px; padding:6px 10px; font-size:12px; cursor:pointer;
+  }
+  .btn-editar{ background:var(--panel-2); color:var(--hueso); }
+  .btn-eliminar{ background:var(--rojo); color:#fff; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h1 style="padding:0">Vidriera</h1>
+  <p class="sub" style="margin-bottom:0">Acceso administrador</p>
+  <input type="password" id="pass" placeholder="Contraseña">
+  <div id="loginError"></div>
+  <button onclick="intentarLogin()">Entrar</button>
+</div>
+
+<div id="app">
+  <h1>Cargar productos</h1>
+  <p class="sub">S-M Motos · Vidriera pública</p>
+  <div class="wrap">
+    <form id="form">
+      <input type="hidden" id="editId">
+      <label>Nombre del producto *</label>
+      <input type="text" id="nombre" required>
+
+      <label>Descripción</label>
+      <textarea id="descripcion"></textarea>
+
+      <label>Precio minorista *</label>
+      <input type="number" id="precio" min="0" step="1" required>
+
+      <label>Categoría</label>
+      <input type="text" id="categoria" placeholder="Ej: Frenos, Motor, Accesorios">
+
+      <label>Foto</label>
+      <input type="file" id="foto" accept="image/*">
+
+      <label>Video (opcional)</label>
+      <input type="file" id="video" accept="video/*">
+
+      <div class="checkrow">
+        <input type="checkbox" id="destacado">
+        <label style="margin:0">Marcar como destacado</label>
+      </div>
+
+      <button type="submit" class="btn" style="margin-top:20px">Guardar producto</button>
+      <button type="button" id="cancelarEdicion" class="btn" onclick="cancelarEdicion()">Cancelar edición</button>
+      <div id="estado"></div>
+    </form>
+
+    <div class="lista" id="lista"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ctdfatckaadjmfvaqvty.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_r6X8MxeJaIeqikBUO8Gdhg_VFG8AfmO';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const ADMIN_PASS = 'chelo1234';
+
+function intentarLogin(){
+  const val = document.getElementById('pass').value;
+  if(val === ADMIN_PASS){
+    sessionStorage.setItem('vidriera_admin_ok','1');
+    mostrarApp();
+  } else {
+    document.getElementById('loginError').textContent = 'Contraseña incorrecta';
+  }
+}
+document.getElementById('pass').addEventListener('keydown', e=>{ if(e.key==='Enter') intentarLogin(); });
+
+function mostrarApp(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  cargarLista();
+}
+if(sessionStorage.getItem('vidriera_admin_ok')==='1') mostrarApp();
+
+const fmt = new Intl.NumberFormat('es-AR', {style:'currency', currency:'ARS', maximumFractionDigits:0});
+
+async function subirArchivo(file, carpeta){
+  if(!file) return null;
+  const nombreArchivo = `${carpeta}/${Date.now()}-${file.name.replace(/\s+/g,'_')}`;
+  const { error } = await sb.storage.from('vidriera').upload(nombreArchivo, file);
+  if(error){ throw error; }
+  const { data } = sb.storage.from('vidriera').getPublicUrl(nombreArchivo);
+  return data.publicUrl;
+}
+
+document.getElementById('form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const estado = document.getElementById('estado');
+  estado.textContent = 'Guardando...';
+  try{
+    const id = document.getElementById('editId').value;
+    const fotoFile = document.getElementById('foto').files[0];
+    const videoFile = document.getElementById('video').files[0];
+
+    const registro = {
+      nombre: document.getElementById('nombre').value.trim(),
+      descripcion: document.getElementById('descripcion').value.trim(),
+      precio: Number(document.getElementById('precio').value),
+      categoria: document.getElementById('categoria').value.trim(),
+      destacado: document.getElementById('destacado').checked,
+    };
+
+    if(fotoFile) registro.foto_url = await subirArchivo(fotoFile, 'fotos');
+    if(videoFile) registro.video_url = await subirArchivo(videoFile, 'videos');
+
+    let error;
+    if(id){
+      ({ error } = await sb.from('Vidriera').update(registro).eq('id', id));
+    } else {
+      ({ error } = await sb.from('Vidriera').insert(registro));
+    }
+    if(error) throw error;
+
+    estado.textContent = id ? 'Producto actualizado ✔' : 'Producto guardado ✔';
+    cancelarEdicion();
+    cargarLista();
+  } catch(err){
+    console.error(err);
+    estado.textContent = 'Error al guardar. Revisá los datos e intentá de nuevo.';
+  }
+});
+
+function cancelarEdicion(){
+  document.getElementById('form').reset();
+  document.getElementById('editId').value = '';
+  document.getElementById('cancelarEdicion').style.display = 'none';
+  document.querySelector('#form button[type=submit]').textContent = 'Guardar producto';
+}
+
+async function cargarLista(){
+  const cont = document.getElementById('lista');
+  cont.innerHTML = 'Cargando...';
+  const { data, error } = await sb.from('Vidriera').select('*').order('created_at', {ascending:false});
+  if(error){ cont.innerHTML = 'No se pudo cargar la lista.'; return; }
+  if(!data.length){ cont.innerHTML = '<p class="sub">Todavía no cargaste productos.</p>'; return; }
+  cont.innerHTML = '';
+  data.forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <img src="${p.foto_url || ''}" onerror="this.style.visibility='hidden'">
+      <div class="datos">
+        <div class="nombre">${p.nombre}</div>
+        <div class="precio">${fmt.format(p.precio)}</div>
+        <div class="cat">${p.categoria || ''}</div>
+      </div>
+      <div class="acciones">
+        <button class="btn-editar">Editar</button>
+        <button class="btn-eliminar">Eliminar</button>
+      </div>
+    `;
+    div.querySelector('.btn-editar').onclick = ()=>editar(p);
+    div.querySelector('.btn-eliminar').onclick = ()=>eliminar(p.id);
+    cont.appendChild(div);
+  });
+}
+
+function editar(p){
+  document.getElementById('editId').value = p.id;
+  document.getElementById('nombre').value = p.nombre || '';
+  document.getElementById('descripcion').value = p.descripcion || '';
+  document.getElementById('precio').value = p.precio || '';
+  document.getElementById('categoria').value = p.categoria || '';
+  document.getElementById('destacado').checked = !!p.destacado;
+  document.getElementById('cancelarEdicion').style.display = 'block';
+  document.querySelector('#form button[type=submit]').textContent = 'Guardar cambios';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+async function eliminar(id){
+  if(!confirm('¿Eliminar este producto de la vidriera?')) return;
+  const { error } = await sb.from('Vidriera').delete().eq('id', id);
+  if(error){ alert('No se pudo eliminar'); return; }
+  cargarLista();
+}
+</script>
+</body>
+</html>

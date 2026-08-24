@@ -3,57 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>S-M Motos | Vidriera</title>
+<title>S-M Motos | Tienda Web</title>
 <meta name="description" content="Repuestos de moto S-M Motos. Fotos, precios y videos de nuestros productos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --grafito:#1F2226;
-    --panel:#2A2E33;
-    --panel-2:#33383E;
-    --acero:#7A828C;
+    --grafito:#FFFFFF;
+    --panel:#F4F4F3;
+    --panel-2:#EAEAE8;
+    --acero:#6B7078;
     --amarillo:#F5B700;
     --rojo:#C1272D;
-    --hueso:#EDEAE3;
-    --linea:#3D434A;
+    --hueso:#1F2226;
+    --linea:#DDDDDA;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     background:var(--grafito);
-    background-image:
-      radial-gradient(circle at 2px 2px, rgba(255,255,255,0.035) 1.5px, transparent 1.5px);
-    background-size: 26px 26px;
     color:var(--hueso);
     font-family:'Inter',sans-serif;
     -webkit-font-smoothing:antialiased;
   }
   header{
-    padding:28px 20px 18px;
+    padding:30px 20px 20px;
     text-align:center;
-    border-bottom:3px solid var(--amarillo);
-    background:linear-gradient(180deg, rgba(0,0,0,0.15), transparent);
+    border-bottom:5px solid var(--amarillo);
+    background:#fff;
   }
   .eyebrow{
     font-family:'Oswald',sans-serif;
     font-size:12px;
     letter-spacing:4px;
-    color:var(--amarillo);
+    color:var(--acero);
     font-weight:600;
   }
   h1{
     font-family:'Oswald',sans-serif;
-    font-size:34px;
+    font-size:46px;
+    font-weight:700;
     letter-spacing:1px;
-    margin:6px 0 4px;
+    margin:6px 0 8px;
     text-transform:uppercase;
+    color:var(--amarillo);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.08);
   }
   header p{
     color:var(--acero);
-    font-size:13.5px;
+    font-size:14px;
     margin:0;
+  }
+  header p.direccion{
+    font-family:'Oswald',sans-serif;
+    letter-spacing:0.5px;
+    color:var(--hueso);
+    font-size:14px;
+    margin-top:4px;
   }
   .filtros{
     display:flex;
@@ -97,6 +104,7 @@
     overflow:hidden;
     cursor:pointer;
     position:relative;
+    box-shadow:0 1px 3px rgba(0,0,0,0.06);
     transition:transform .15s ease, border-color .15s ease;
   }
   .card:hover{ transform:translateY(-3px); border-color:var(--amarillo); }
@@ -184,7 +192,7 @@
   #modal .body{ padding:18px 20px 22px; }
   #modal .cat{ color:var(--amarillo); font-size:11px; letter-spacing:2px; text-transform:uppercase; font-family:'Oswald',sans-serif;}
   #modal h2{ font-family:'Oswald',sans-serif; text-transform:uppercase; font-size:22px; margin:6px 0 10px; }
-  #modal .desc{ color:#C9CBCE; font-size:14px; line-height:1.5; margin-bottom:16px; }
+  #modal .desc{ color:#4A4E54; font-size:14px; line-height:1.5; margin-bottom:16px; }
   #modal .preciobox{
     display:inline-block;
     background:var(--amarillo); color:#1F2226;
@@ -204,8 +212,9 @@
 <body>
 
 <header>
-  <div class="eyebrow">S-M MOTOS · MAR DEL PLATA</div>
-  <h1>Vidriera de repuestos</h1>
+  <div class="eyebrow">TIENDA WEB</div>
+  <h1>S-M Motos</h1>
+  <p class="direccion">Av. Polonia 2260, Mar del Plata</p>
   <p>Fotos, precios y videos de nuestros productos</p>
 </header>
 

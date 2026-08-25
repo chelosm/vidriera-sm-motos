@@ -123,6 +123,7 @@
       <div id="estado"></div>
     </form>
 
+    <input type="text" id="buscador" placeholder="Buscar producto por nombre..." style="margin-top:26px">
     <div class="lista" id="lista"></div>
   </div>
 </div>
@@ -132,6 +133,8 @@ const SUPABASE_URL = 'https://ctdfatckaadjmfvaqvty.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_r6X8MxeJaIeqikBUO8Gdhg_VFG8AfmO';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const ADMIN_PASS = 'chelo1234';
+
+let productosCache = [];
 
 function intentarLogin(){
   const val = document.getElementById('pass').value;
@@ -211,7 +214,13 @@ async function cargarLista(){
   cont.innerHTML = 'Cargando...';
   const { data, error } = await sb.from('Vidriera').select('*').order('created_at', {ascending:false});
   if(error){ cont.innerHTML = 'No se pudo cargar la lista.'; return; }
-  if(!data.length){ cont.innerHTML = '<p class="sub">Todavía no cargaste productos.</p>'; return; }
+  productosCache = data || [];
+  renderLista(productosCache);
+}
+
+function renderLista(data){
+  const cont = document.getElementById('lista');
+  if(!data.length){ cont.innerHTML = '<p class="sub">No hay productos que coincidan.</p>'; return; }
   cont.innerHTML = '';
   data.forEach(p=>{
     const div = document.createElement('div');
@@ -233,6 +242,16 @@ async function cargarLista(){
     cont.appendChild(div);
   });
 }
+
+document.getElementById('buscador').addEventListener('input', (e)=>{
+  const texto = e.target.value.trim().toLowerCase();
+  if(!texto){ renderLista(productosCache); return; }
+  const filtrados = productosCache.filter(p =>
+    (p.nombre || '').toLowerCase().includes(texto) ||
+    (p.categoria || '').toLowerCase().includes(texto)
+  );
+  renderLista(filtrados);
+});
 
 function editar(p){
   document.getElementById('editId').value = p.id;

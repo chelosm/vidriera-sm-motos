@@ -118,6 +118,9 @@
     position:relative;
     box-shadow:0 1px 3px rgba(0,0,0,0.06);
     transition:transform .15s ease, border-color .15s ease;
+    display:flex;
+    flex-direction:column;
+    height:100%;
   }
   .card:hover{ transform:translateY(-3px); border-color:var(--amarillo); }
   .card.destacado{ border-color:var(--amarillo); }
@@ -138,7 +141,7 @@
   }
   .foto-wrap img{ width:100%; height:100%; object-fit:cover; }
   .foto-wrap .sinfoto{ color:var(--acero); font-size:11px; }
-  .info{ padding:10px 12px 34px; position:relative; }
+  .info{ padding:10px 12px 34px; position:relative; flex:1; display:flex; flex-direction:column; }
   .info .cat{
     font-size:10px; letter-spacing:1px; text-transform:uppercase;
     color:var(--acero); margin-bottom:2px;
@@ -173,16 +176,34 @@
   }
   .tag-consultar{
     position:absolute;
-    left:0; right:0; bottom:0;
+    right:-6px; bottom:-6px;
+    margin:0;
+    width:76px; height:76px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     text-align:center;
-    font-size:11.5px;
-    padding:7px 10px;
     background:#E6007E;
     color:#fff;
-    transform:none;
-    border-radius:0;
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    font-size:9.5px;
+    line-height:1.15;
+    letter-spacing:.3px;
+    text-transform:uppercase;
+    padding:6px;
+    clip-path: polygon(
+      50% 0%, 61% 12%, 75% 4%, 79% 19%,
+      95% 15%, 92% 31%, 100% 40%, 88% 50%,
+      100% 60%, 92% 69%, 95% 85%, 79% 81%,
+      75% 96%, 61% 88%, 50% 100%, 39% 88%,
+      25% 96%, 21% 81%, 5% 85%, 8% 69%,
+      0% 60%, 12% 50%, 0% 40%, 8% 31%,
+      5% 15%, 21% 19%, 25% 4%, 39% 12%
+    );
+    transform:rotate(-6deg);
+    box-shadow:0 2px 4px rgba(0,0,0,.25);
   }
-  .tag-consultar::before{ display:none; }
   .vacio{
     text-align:center; padding:60px 20px; color:var(--acero);
     font-family:'Oswald',sans-serif; letter-spacing:1px; text-transform:uppercase;
@@ -226,7 +247,20 @@
   }
   #modal .preciobox-consultar{
     background:#E6007E; color:#fff;
-    font-size:15px;
+    font-size:12px;
+    width:90px; height:90px;
+    display:flex; align-items:center; justify-content:center;
+    padding:6px;
+    border-radius:0;
+    clip-path: polygon(
+      50% 0%, 61% 12%, 75% 4%, 79% 19%,
+      95% 15%, 92% 31%, 100% 40%, 88% 50%,
+      100% 60%, 92% 69%, 95% 85%, 79% 81%,
+      75% 96%, 61% 88%, 50% 100%, 39% 88%,
+      25% 96%, 21% 81%, 5% 85%, 8% 69%,
+      0% 60%, 12% 50%, 0% 40%, 8% 31%,
+      5% 15%, 21% 19%, 25% 4%, 39% 12%
+    );
   }
   #modal .btn-wsp{
     display:flex; align-items:center; justify-content:center; gap:8px;

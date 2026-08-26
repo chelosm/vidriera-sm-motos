@@ -311,7 +311,7 @@ function render(){
       <div class="info">
         <div class="cat">${p.categoria || ''}</div>
         <div class="nombre">${p.nombre}</div>
-        <div class="tag">${fmt.format(p.precio)}</div>
+        ${p.precio > 0 ? `<div class="tag">${fmt.format(p.precio)}</div>` : ''}
       </div>
     `;
     grid.appendChild(card);
@@ -322,7 +322,13 @@ function abrirModal(p){
   document.getElementById('modalCat').textContent = p.categoria || '';
   document.getElementById('modalNombre').textContent = p.nombre;
   document.getElementById('modalDesc').textContent = p.descripcion || '';
-  document.getElementById('modalPrecio').textContent = fmt.format(p.precio);
+  const precioBox = document.getElementById('modalPrecio');
+  if(p.precio > 0){
+    precioBox.style.display = '';
+    precioBox.textContent = fmt.format(p.precio);
+  } else {
+    precioBox.style.display = 'none';
+  }
   const media = document.getElementById('modalMedia');
   if(p.video_url){
     media.innerHTML = `<video src="${p.video_url}" controls playsinline ${p.foto_url ? `poster="${p.foto_url}"`:''}></video>`;
@@ -331,7 +337,9 @@ function abrirModal(p){
   } else {
     media.innerHTML = '';
   }
-  const msg = encodeURIComponent(`Hola! Te consulto por: ${p.nombre} (${fmt.format(p.precio)})`);
+  const msg = p.precio > 0
+    ? encodeURIComponent(`Hola! Te consulto por: ${p.nombre} (${fmt.format(p.precio)})`)
+    : encodeURIComponent(`Hola! Te consulto por: ${p.nombre}`);
   document.getElementById('btnWsp').onclick = ()=>{
     window.open(`https://wa.me/${WSP_NUMERO}?text=${msg}`, '_blank');
   };
